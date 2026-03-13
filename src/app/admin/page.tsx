@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Plus, Send, AlertCircle, CheckCircle2, Loader2, Trash2, LogOut, Edit2, X } from "lucide-react";
+import { Plus, Send, AlertCircle, CheckCircle2, Loader2, Trash2, LogOut, Edit2, X, Archive } from "lucide-react";
+import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import { cn } from "../../lib/utils";
 
@@ -81,6 +82,17 @@ export default function AdminPage() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       router.push("/login");
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      router.push("/");
     } else {
       setAuthLoading(false);
     }
@@ -177,60 +189,68 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold premium-gradient-text tracking-tight flex items-center gap-3">
-            <Plus className="w-8 h-8 text-primary" />
-            Admin Dashboard
+    <div className="max-w-2xl mx-auto space-y-12 pt-8 pb-20">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-white/5 pb-10">
+        <div className="space-y-4">
+          <div className="inline-block">
+            <span className="text-primary text-[10px] font-black tracking-[0.4em] uppercase border-b border-primary/20 pb-2">
+              Editorial Control
+            </span>
+          </div>
+          <h1 className="text-5xl font-serif italic text-white tracking-tight">
+            Dashboard
           </h1>
-          <p className="text-slate-400 text-sm">
-            Add and manage daily quick updates for today.
-          </p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl transition-colors text-sm font-medium border border-white/10"
-        >
-          <LogOut className="w-4 h-4" />
-          Sign Out
-        </button>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/archive"
+            className="px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white text-[10px] font-black tracking-[0.3em] uppercase hover:bg-white/10 transition-all"
+          >
+            Archive
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 hover:text-rose-500 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
       </header>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-8"
+        className="glass-card p-10 md:p-12 space-y-10"
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-300 ml-1">
-              News Content (One Line)
+        <form onSubmit={handleSubmit} className="space-y-10">
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">
+              Brief Content
             </label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="e.g., Government announces new simplified recruitment process for civil services..."
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all min-h-[120px] resize-none"
+              placeholder="THE WORLD IN A SINGLE LINE..."
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-6 text-slate-100 placeholder:text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all min-h-[140px] resize-none font-serif italic text-lg"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-300 ml-1">
-              Category
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">
+              Select Category
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                    "px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border",
                     category === cat
-                      ? "bg-primary text-white shadow-lg shadow-primary/25"
-                      : "bg-white/5 text-slate-400 hover:text-slate-200 hover:bg-white/10"
+                      ? "bg-primary border-primary text-white shadow-xl shadow-primary/20"
+                      : "bg-white/5 border-white/5 text-slate-500 hover:text-white hover:border-white/10"
                   )}
                 >
                   {cat}
@@ -242,15 +262,12 @@ export default function AdminPage() {
           <button
             type="submit"
             disabled={loading || !content.trim()}
-            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 active:scale-95"
+            className="w-full bg-primary text-white font-black text-[11px] uppercase tracking-[0.3em] py-5 rounded-2xl transition-all shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 disabled:opacity-30 disabled:translate-y-0 disabled:shadow-none"
           >
             {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin mx-auto" />
             ) : (
-              <>
-                <Send className="w-5 h-5" />
-                Publish News
-              </>
+              "Publish Intelligence"
             )}
           </button>
         </form>
@@ -357,83 +374,125 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* NEW SECTION: Manage Today's News */}
-      <div className="pt-8 border-t border-white/5 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-slate-200">Manage Today's News</h2>
-          <span className="bg-white/5 text-slate-400 px-3 py-1 rounded-full text-xs font-medium border border-white/10">
-            {todaysNews.length} items
-          </span>
-        </div>
+      <div className="pt-12 border-t border-white/5 space-y-12">
+        <section className="space-y-6">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">
+            Topic Management
+          </h2>
+          <div className="space-y-6">
+            <form onSubmit={handleAddCategory} className="flex gap-4">
+              <input
+                type="text"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                placeholder="NEW VOLUME..."
+                className="flex-1 bg-white/[0.03] border border-white/10 rounded-full px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-200 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all placeholder:text-slate-700"
+              />
+              <button
+                type="submit"
+                disabled={categoryLoading || !newCategory.trim()}
+                className="bg-white/5 hover:bg-white/10 text-slate-300 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
+              >
+                {categoryLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
+              </button>
+            </form>
 
-        {newsLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <div className="flex flex-wrap gap-3">
+              {categories.map((cat) => (
+                <div 
+                  key={cat} 
+                  className="group flex items-center gap-3 px-4 py-2 bg-white/[0.02] border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-600"
+                >
+                  {cat}
+                  {cat !== "General" && (
+                    <button 
+                      onClick={() => handleDeleteCategory(cat)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-700 hover:text-rose-500"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        ) : todaysNews.length === 0 ? (
-          <div className="text-center py-8 bg-white/5 border border-white/10 rounded-2xl">
-            <p className="text-slate-400 text-sm">No news published today yet.</p>
+        </section>
+
+        <section className="space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">
+              Live Intelligence Briefs
+            </h2>
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-700">
+              {todaysNews.length} SECTIONS
+            </span>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {todaysNews.map((item) => (
-              <div key={item.id} className="group glass-card p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                {editingId === item.id ? (
-                  <div className="flex-1 w-full space-y-3">
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      className="w-full bg-slate-900/50 border border-primary/30 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-primary transition-colors min-h-[80px]"
-                    />
-                    <div className="flex items-center gap-2 justify-end">
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-1"
-                      >
-                        <X className="w-3.5 h-3.5" /> Cancel
-                      </button>
-                      <button
-                        onClick={() => handleUpdateNews(item.id)}
-                        className="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors flex items-center gap-1"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Save Changes
-                      </button>
+
+          {newsLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : todaysNews.length === 0 ? (
+            <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700">Waiting for publication...</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {todaysNews.map((item) => (
+                <div key={item.id} className="group glass-card p-6 flex flex-col gap-6 transition-all duration-500 hover:bg-white/[0.03]">
+                  {editingId === item.id ? (
+                    <div className="w-full space-y-4">
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full bg-slate-900/50 border border-primary/30 rounded-2xl px-6 py-4 text-sm text-slate-200 focus:outline-none focus:border-primary transition-colors min-h-[100px] font-serif italic"
+                      />
+                      <div className="flex items-center gap-4 justify-end">
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleUpdateNews(item.id)}
+                          className="px-6 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                        >
+                          Save
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex-1 space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded flex w-fit">
-                        {item.category}
-                      </span>
-                      <p className="text-sm text-slate-200 leading-relaxed pr-4">
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
+                          {item.category}
+                        </span>
+                        <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => startEditing(item)}
+                            className="p-1 text-slate-600 hover:text-white transition-colors"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteNews(item.id)}
+                            className="p-1 text-slate-600 hover:text-rose-500 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="font-serif italic text-lg text-slate-300 leading-relaxed pr-10">
                         {item.content}
                       </p>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity self-end sm:self-start border border-white/5 bg-slate-900/50 rounded-lg p-1">
-                      <button
-                        onClick={() => startEditing(item)}
-                        className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-md transition-colors"
-                        title="Edit News"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <div className="w-px h-4 bg-white/10" />
-                      <button
-                        onClick={() => handleDeleteNews(item.id)}
-                        className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors"
-                        title="Delete News"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

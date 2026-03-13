@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: #3b82f6;
-  --color-secondary: #6366f1;
-  --color-accent: #f43f5e;
+  --color-primary: #ec5b13;
+  --color-secondary: #1e293b;
+  --color-accent: #ec5b13;
   
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.2) 100%);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 
 :root {
@@ -16,25 +16,31 @@
 }
 
 body {
-  background: radial-gradient(circle at top left, #1e293b, #0f172a);
+  background: radial-gradient(circle at 50% -20%, #1e293b 0%, #0f172a 70%);
   color: var(--foreground);
   min-height: 100vh;
 }
 
 .glass-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: 1.5rem;
 }
 
 .premium-gradient-text {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.geometric-accent {
+  width: 1px;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, rgba(236, 91, 19, 0.5), transparent);
 }
 
 .news-card-hover {

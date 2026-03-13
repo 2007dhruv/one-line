@@ -1,0 +1,74 @@
+# "One Line" Web App Walkthrough
+
+I have completed the initial web version of the "One Line" news platform. The application is built with **Next.js 15**, **Tailwind CSS 4**, and **Supabase**.
+
+## Key Components
+
+### 1. Daily News Feed (Home)
+The homepage features a premium, animated list of today's news. Each item is presented in a concise, "one-line" format, optimized for quick reading.
+- **Glassmorphism Design**: Using modern blur and transparency effects.
+- **Dynamic Fetching**: Real-time integration with Supabase hooks into the `news` table.
+- **Micro-animations**: Smooth entry transitions using Framer Motion.
+
+### 2. Admin Dashboard (`/admin`)
+A secure zone for admins to publish daily news items.
+- **Category Selection**: Easily tag news as National, International, Science, etc.
+- **Real-time Submission**: Directly persists news to the database for immediate public viewing.
+- **Validation**: Ensures high-quality content entry.
+
+### 3. Calendar Archive (`/archive`)
+A dedicated page for browsing historical news.
+- **Date Navigation**: Intuitive controls to switch between dates.
+- **Animated Transitions**: Seamlessly switches news lists based on the selected date.
+
+## Technical Highlights
+- **Premium CSS Foundation**: A custom design system built directly into [globals.css](file:///d:/one%20line/src/app/globals.css) using Tailwind 4's new `@theme` engine.
+- **Unified Backend**: Supabase handles both the database and (future) authentication, making it perfectly positioned for the upcoming mobile app.
+
+## Mobile App (React Native/Expo)
+
+I have also completed the mobile version of the "One Line" app, located in the `/mobile` directory. It mirrors the premium web experience but is optimized for handheld devices.
+
+### Mobile Features:
+- **Native Experience**: Built with Expo for high performance on both Android and iOS.
+- **Fluid Animations**: Uses React Native Reanimated for smooth loading transitions.
+- **Pull-to-Refresh**: Easily check for new updates with standard mobile gestures.
+- **Direct Database Sync**: Uses the same Supabase instance as the web app.
+
+### How to Run the Mobile App (Development):
+1. Navigate to the mobile folder: `cd mobile`
+2. Run `npx expo start --clear`
+3. Scan the QR code with the **Expo Go** app on your phone.
+
+### Build for Production (Play Store & APK):
+To generate actual installation files (`.apk` for testing, `.aab` for the Google Play Store), we use **EAS (Expo Application Services)**.
+
+1. **Install EAS CLI**: 
+   ```bash
+   npm install -g eas-cli
+   ```
+2. **Login to Expo**:
+   ```bash
+   eas login
+   ```
+3. **Configure the Project**:
+   ```bash
+   eas build:configure
+   ```
+4. **Build an APK (For testing directly on your phone)**:
+   ```bash
+   eas build -p android --profile preview
+   ```
+5. **Build an AAB (For uploading to Google Play Store)**:
+   ```bash
+   eas build -p android
+   ```
+When the build is complete, Expo will provide a direct link to download your app file!
+
+---
+
+## Technical Architecture Success
+Both the Web and Mobile applications now share a single source of truth:
+- **Database**: Supabase PostgreSQL.
+- **Schema**: Defined in `schema.sql`.
+- **Environment**: Managed via `.env.local` (Web) and `src/lib/supabase.ts` (Mobile).
